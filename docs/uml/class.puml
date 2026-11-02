@@ -1,0 +1,111 @@
+@startuml class
+title COLORS Web App - Class Diagram
+skinparam classAttributeIconSize 0
+
+package "Frontend (public/)" {
+  class "index.html" as IndexPage <<page>> {
+    loginName : input
+    loginPassword : input
+    loginResult : span
+    + onclick loginButton() -> doLogin()
+  }
+
+  class "color.html" as ColorPage <<page>> {
+    searchText : input
+    colorSearchResult : span
+    colorList : p
+    colorText : input
+    colorAddResult : span
+    + onload() -> readCookie()
+    + onclick logoutButton() -> doLogout()
+    + onclick searchColorButton() -> searchColor()
+    + onclick addColorButton() -> addColor()
+  }
+
+  class "code.js" as CodeJS <<script>> {
+    - urlBase : String = "/api"
+    - extension : String = "php"
+    - userId : int
+    - firstName : String
+    - lastName : String
+    + doLogin() : void
+    + saveCookie() : void
+    + readCookie() : void
+    + doLogout() : void
+    + addColor() : void
+    + searchColor() : void
+  }
+
+  class "md5.js" as MD5 <<script>> {
+    + md5(str) : String
+  }
+}
+
+package "Backend (api/)" {
+  class "Login.php" as Login <<endpoint>> {
+    + getRequestInfo() : array
+    + sendResultInfoAsJson(obj) : void
+    + returnWithError(err) : void
+    + returnWithInfo(firstName, lastName, id) : void
+  }
+
+  class "SearchColors.php" as Search <<endpoint>> {
+    + getRequestInfo() : array
+    + sendResultInfoAsJson(obj) : void
+    + returnWithError(err) : void
+    + returnWithInfo(searchResults) : void
+  }
+
+  class "AddColor.php" as Add <<endpoint>> {
+    + getRequestInfo() : array
+    + sendResultInfoAsJson(obj) : void
+    + returnWithError(err) : void
+  }
+
+  class "config.php" as Config <<config>> {
+    $db_host : String
+    $db_user : String
+    $db_pass : String
+    $db_name : String
+  }
+}
+
+package "Database (MySQL COP4331)" {
+  class Users <<table>> {
+    + ID : int <<PK>>
+    firstName : varchar
+    lastName : varchar
+    Login : varchar
+    Password : varchar
+  }
+
+  class Colors <<table>> {
+    UserID : int <<FK>>
+    Name : varchar
+  }
+}
+
+IndexPage ..> CodeJS : loads
+IndexPage ..> MD5 : loads
+ColorPage ..> CodeJS : loads
+
+CodeJS ..> Login : POST JSON (XHR)
+CodeJS ..> Search : POST JSON (XHR)
+CodeJS ..> Add : POST JSON (XHR)
+
+Login ..> Config : require_once
+Search ..> Config : require_once
+Add ..> Config : require_once
+
+Login ..> Users : SELECT
+Search ..> Colors : SELECT
+Add ..> Colors : INSERT
+
+Users "1" -- "0..*" Colors : owns >
+
+note bottom of MD5
+  Loaded but unused:
+  the md5() call in doLogin()
+  is commented out.
+end note
+@enduml

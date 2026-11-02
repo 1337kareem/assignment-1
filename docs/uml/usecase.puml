@@ -1,0 +1,37 @@
+@startuml usecase
+title COLORS Web App - Use Case Diagram
+left to right direction
+
+actor "User" as user
+actor "MySQL Database\n(COP4331)" as db <<system>>
+
+rectangle "COLORS Web Application" {
+  usecase "Log In" as UC1
+  usecase "Search Colors" as UC2
+  usecase "Add Color" as UC3
+  usecase "Log Out" as UC4
+  usecase "Show Login Error" as UC6
+}
+
+user --> UC1
+user --> UC2
+user --> UC3
+user --> UC4
+
+UC6 ..> UC1 : <<extend>>\n[invalid login]
+
+UC1 --> db
+UC2 --> db
+UC3 --> db
+
+note right of user
+  No registration use case:
+  users are inserted directly
+  into the Users table.
+end note
+note bottom of UC2
+  color.html runs readCookie() once on page load
+  and redirects to index.html if no userId is found.
+  Search and Add use that userId.
+end note
+@enduml
