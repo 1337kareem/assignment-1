@@ -6,28 +6,34 @@ package "Frontend (public/)" {
   class "index.html" as IndexPage <<page>> {
     loginName : input
     loginPassword : input
+    loginButton : button
     loginResult : span
-    + onclick loginButton() -> doLogin()
+    .. event handlers ..
+    loginButton onclick -> doLogin()
   }
 
   class "color.html" as ColorPage <<page>> {
+    logoutButton : button
     searchText : input
+    searchColorButton : button
     colorSearchResult : span
     colorList : p
     colorText : input
+    addColorButton : button
     colorAddResult : span
-    + onload() -> readCookie()
-    + onclick logoutButton() -> doLogout()
-    + onclick searchColorButton() -> searchColor()
-    + onclick addColorButton() -> addColor()
+    .. event handlers ..
+    DOMContentLoaded -> readCookie()
+    logoutButton onclick -> doLogout()
+    searchColorButton onclick -> searchColor()
+    addColorButton onclick -> addColor()
   }
 
   class "code.js" as CodeJS <<script>> {
-    - urlBase : String = "/api"
-    - extension : String = "php"
-    - userId : int
-    - firstName : String
-    - lastName : String
+    + urlBase : String = "/api" {readOnly}
+    + extension : String = "php" {readOnly}
+    + userId : Number = 0
+    + firstName : String = ""
+    + lastName : String = ""
     + doLogin() : void
     + saveCookie() : void
     + readCookie() : void
@@ -37,8 +43,14 @@ package "Frontend (public/)" {
   }
 
   class "md5.js" as MD5 <<script>> {
-    + md5(str) : String
+    + md5(string, key, raw) : String
   }
+
+  note right of MD5
+    Loaded but unused:
+    the md5() call in doLogin()
+    is commented out.
+  end note
 }
 
 package "Backend (api/)" {
@@ -72,7 +84,7 @@ package "Backend (api/)" {
 
 package "Database (MySQL COP4331)" {
   class Users <<table>> {
-    + ID : int <<PK>>
+    ID : int <<PK>>
     firstName : varchar
     lastName : varchar
     Login : varchar
@@ -83,11 +95,15 @@ package "Database (MySQL COP4331)" {
     UserID : int <<FK>>
     Name : varchar
   }
+
+  note "Only the columns used by\nthe PHP queries are shown." as DBNote
 }
 
 IndexPage ..> CodeJS : loads
 IndexPage ..> MD5 : loads
 ColorPage ..> CodeJS : loads
+CodeJS ..> IndexPage : redirects to,\nreads/writes elements
+CodeJS ..> ColorPage : redirects to,\nreads/writes elements
 
 CodeJS ..> Login : POST JSON (XHR)
 CodeJS ..> Search : POST JSON (XHR)
@@ -102,10 +118,7 @@ Search ..> Colors : SELECT
 Add ..> Colors : INSERT
 
 Users "1" -- "0..*" Colors : owns >
+DBNote .. Users
+DBNote .. Colors
 
-note bottom of MD5
-  Loaded but unused:
-  the md5() call in doLogin()
-  is commented out.
-end note
 @enduml

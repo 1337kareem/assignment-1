@@ -10,7 +10,7 @@ rectangle "COLORS Web Application" {
   usecase "Search Colors" as UC2
   usecase "Add Color" as UC3
   usecase "Log Out" as UC4
-  usecase "Show Login Error" as UC6
+  usecase "Show Login Error" as UC5
 }
 
 user --> UC1
@@ -18,7 +18,7 @@ user --> UC2
 user --> UC3
 user --> UC4
 
-UC6 ..> UC1 : <<extend>>\n[invalid login]
+UC5 ..> UC1 : <<extend>>\n[invalid login]
 
 UC1 --> db
 UC2 --> db
@@ -29,9 +29,11 @@ note right of user
   users are inserted directly
   into the Users table.
 end note
+
 note bottom of UC2
   color.html runs readCookie() once on page load
   and redirects to index.html if no userId is found.
-  Search and Add use that userId.
+  Search and Add send that userId, so each user
+  only searches and adds their own colors.
 end note
 @enduml
