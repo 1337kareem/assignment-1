@@ -11,12 +11,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
       - run: npm ci
       - name: HTML (HTMLHint)
         run: npm run lint:html
       - name: CSS (Stylelint)
+        if: success() || failure()
         run: npm run lint:css
       - name: JavaScript (ESLint)
+        if: success() || failure()
         run: npm run lint:js
